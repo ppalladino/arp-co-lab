@@ -27,6 +27,7 @@ class TapTempo {
     static const int QUARTER_NOTE;
     static const int HALF_NOTE;
     static const int WHOLE_NOTE;
+    
     static const int ABANDON_FIRST_TAP_MS;
     
     TapTempo();

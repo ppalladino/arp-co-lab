@@ -103,13 +103,12 @@ int Array<T, MAX_SIZE>::getIdx(const T &_value)
 }
 
 template <typename T, size_t MAX_SIZE>
-int Array<T, MAX_SIZE>::getNextIdx(const T &_value)
+int Array<T, MAX_SIZE>::getNextIdx(int _idx)
 {  
-  int idx = getIdx(_value);
-  if(idx < 0) {
+  if(_idx < 0) {
     return 0;
   }
-  int nextIdx = idx += 1;  
+  int nextIdx = _idx += 1;  
   if(nextIdx > getSize() - 1) {
     return 0;
   }
@@ -117,9 +116,34 @@ int Array<T, MAX_SIZE>::getNextIdx(const T &_value)
 }
 
 template <typename T, size_t MAX_SIZE>
+int Array<T, MAX_SIZE>::getPrevIdx(int _idx)
+{  
+  if(_idx > getSize() - 1) {
+    return getSize() - 1;
+  }
+  int prevIdx = _idx -= 1;  
+  if(prevIdx < 0) {
+    return getSize() - 1;
+  }
+  return prevIdx;
+}
+
+template <typename T, size_t MAX_SIZE>
+int Array<T, MAX_SIZE>::getRandomIdx()
+{
+  return rand() % getSize();
+}
+
+template <typename T, size_t MAX_SIZE>
 int Array<T, MAX_SIZE>::getSize()
 {
   return size;
+}
+
+template <typename T, size_t MAX_SIZE>
+bool Array<T, MAX_SIZE>::hasIdx(int _idx)
+{
+  return (_idx >= 0 && _idx < getSize());
 }
 
 template <typename T, size_t MAX_SIZE>

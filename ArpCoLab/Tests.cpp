@@ -8,6 +8,7 @@ Tests::Tests() {
 void Tests::runTests() {
   runArrayTests();
   runTapTempoTests();
+  runPatternTests();
   
   Serial << "//////////////////////////////////////////////////////////////////////" << endl;
   Serial << "Ran " << numTests << " tests" << endl;
@@ -16,7 +17,6 @@ void Tests::runTests() {
   } else {
     Serial << "ERRORS!! There were " << numErrors << " errors." << endl;
   }
-  
 }
 
 void Tests::test(int line, bool condition, char message[]) {
@@ -183,13 +183,34 @@ void Tests::runArrayTests() {
   Serial << "#Array: get next index" << endl;
   test(
     __LINE__,
-    (intArray.getNextIdx(3) == 3), 
-    "- the index after value 3 should be index 3"
+    (intArray.getNextIdx(0) == 1), 
+    "- the index after idx 0 should be index 1"
   );
   test(
     __LINE__,
-    (intArray.getNextIdx(5) == 0), 
-    "- the index after value 5 DNE so should wrap and return 0"
+    (intArray.getNextIdx(4) == 0), 
+    "- the index after idx 4 so should wrap and return 0"
+  );
+
+  //
+  // Array: Get Prev Index
+  //
+
+  Serial << "#Array: get prev index" << endl;
+  test(
+    __LINE__,
+    (intArray.getPrevIdx(0) == 4), 
+    "- the index prev idx 0 should wrap and return 4"
+  );
+  test(
+    __LINE__,
+    (intArray.getPrevIdx(4) == 3), 
+    "- the prev after idx 4 so should return 3"
+  );
+  test(
+    __LINE__,
+    (intArray.getPrevIdx(14) == 4), 
+    "- the prev after idx 14 is OOB so should return last idx = 4"
   );
 }
 
@@ -297,7 +318,174 @@ void Tests::runTapTempoTests() {
     (tapTempo.isBeat(currMs) == true), 
     "- just after the beat"
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Pattern Tests
+//
+//////////////////////////////////////////////////////////////////////
+
+void Tests::runPatternTests() {
+
+  // Used in various tests, do not mutate!!
+  const int offsetValues012[3] = {0, 1, 2};
+  Array<int, MAX_PATTERN_SIZE> offsets012;
+  offsets012.assign(3, offsetValues012);
+
+  const int offsetValues01[2] = {0, 1};
+  Array<int, MAX_PATTERN_SIZE> offsets01;
+  offsets01.assign(2, offsetValues01);
+
+  const int directionValuesUp[1] = {Pattern::DIRECTION_UP};
+  Array<int, MAX_PATTERN_DIRECTIONS> directionsUp;
+  directionsUp.assign(1, directionValuesUp);
   
+  const int directionValuesUpDown[2] = {Pattern::DIRECTION_UP, Pattern::DIRECTION_DOWN};
+  Array<int, MAX_PATTERN_DIRECTIONS> directionsUpDown;
+  directionsUpDown.assign(2, directionValuesUpDown);
+  
+  
+  //
+  // Pattern: Initialization
+  //
+  
+  Serial << "#Pattern: initialize" << endl;
+  Pattern pattern; 
+  Pattern childPattern; 
+  childPattern.init(offsets01, directionsUp);
+  
+  pattern.init(offsets012, directionsUpDown);
+  pattern.setChildPattern(&childPattern);
+  
+  test(
+    __LINE__,
+    (pattern.getNumSteps() == 3), 
+    "- numSteps should be 3"
+  );
+  test(
+    __LINE__,
+    (pattern.getChildPattern()->getNumSteps() == 2), 
+    "- child numSteps should be 2"
+  );  
+  test(
+    __LINE__,
+    (pattern.getCurrStep() == 0), 
+    "- curr step should be 0"
+  );
+  test(
+    __LINE__,
+    (pattern.getChildPattern()->getCurrStep() == 0), 
+    "- child curr step should be 0"
+  );  
+  test(
+    __LINE__,
+    (pattern.getCurrOffsetSum() == 0), 
+    "- offset should be 0"
+  );
+  
+  Serial << "#Pattern: step 1" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()      == 0)                    , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffsetIdx() == 0)                    , "- parent offset idx");
+  test(__LINE__, (pattern.getCurrOffset()    == 0)                    , "- parent offset");
+  
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffsetIdx() == 1) , "- child offset idx");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+
+  test(__LINE__, (pattern.getCurrOffsetSum() == 1)                    , "- offset sum");
+
+  Serial << "#Pattern: step 2" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 1) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 1) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 1) , "- offset sum");
+
+  Serial << "#Pattern: step 3" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 1) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 1) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 2) , "- offset sum");
+
+  Serial << "#Pattern: step 4" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 2) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 2) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 2) , "- offset sum");
+
+  Serial << "#Pattern: step 5" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 2) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 2) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 3) , "- offset sum");
+
+  Serial << "#Pattern: step 6" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 0) , "- parent currStep");  
+  test(__LINE__, (pattern.getCurrOffset()                       == 2) , "- parent offset");    
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 2) , "- offset sum");
+
+  Serial << "#Pattern: step 7" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 0) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 2) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 3) , "- offset sum");
+
+  Serial << "#Pattern: step 8" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 1) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 1) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 1) , "- offset sum");
+
+  Serial << "#Pattern: step 9" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 1) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 1) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 2) , "- offset sum");
+
+  Serial << "#Pattern: step 10" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 2) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 0) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 0) , "- offset sum");
+
+  Serial << "#Pattern: step 11" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 2) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 0) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 1) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 1) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 1) , "- offset sum");
+
+  Serial << "#Pattern: step 12 (back to beginning)" << endl;
+  pattern.takeStep();
+  test(__LINE__, (pattern.getCurrStep()                         == 0) , "- parent currStep");
+  test(__LINE__, (pattern.getCurrOffset()                       == 0) , "- parent offset");
+  test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
+  test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
+  test(__LINE__, (pattern.getCurrOffsetSum()                    == 0) , "- offset sum");
+  
+//Serial << "Debug P: " << pattern.getCurrOffsetIdx() << endl;
+//Serial << "Debug C: " << pattern.getChildPattern()->getCurrOffsetIdx() << endl;
 }
 
 

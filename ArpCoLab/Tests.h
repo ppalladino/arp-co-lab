@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "Array.h"
 #include "TapTempo.h"
+#include "Pattern.h"
 
 class Tests
 {
@@ -14,6 +15,7 @@ class Tests
     void runTests();
     void runArrayTests();
     void runTapTempoTests();
+    void runPatternTests();
 
   private:
     int numErrors;

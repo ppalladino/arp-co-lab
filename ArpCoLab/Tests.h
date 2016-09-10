@@ -7,6 +7,7 @@
 #include "Array.h"
 #include "TapTempo.h"
 #include "Pattern.h"
+#include "Scale.h"
 
 class Tests
 {
@@ -16,6 +17,7 @@ class Tests
     void runArrayTests();
     void runTapTempoTests();
     void runPatternTests();
+    void runScaleTests();
 
   private:
     int numErrors;

@@ -1,5 +1,7 @@
 #include "Tests.h"
 
+#define DEBUG;
+
 Tests::Tests() {
   numErrors = 0;
   numTests = 0;
@@ -9,6 +11,7 @@ void Tests::runTests() {
   runArrayTests();
   runTapTempoTests();
   runPatternTests();
+  runScaleTests();
   
   Serial << "//////////////////////////////////////////////////////////////////////" << endl;
   Serial << "Ran " << numTests << " tests" << endl;
@@ -329,22 +332,10 @@ void Tests::runTapTempoTests() {
 void Tests::runPatternTests() {
 
   // Used in various tests, do not mutate!!
-  const int offsetValues012[3] = {0, 1, 2};
-  Array<int, MAX_PATTERN_SIZE> offsets012;
-  offsets012.assign(3, offsetValues012);
-
-  const int offsetValues01[2] = {0, 1};
-  Array<int, MAX_PATTERN_SIZE> offsets01;
-  offsets01.assign(2, offsetValues01);
-
-  const int directionValuesUp[1] = {Pattern::DIRECTION_UP};
-  Array<int, MAX_PATTERN_DIRECTIONS> directionsUp;
-  directionsUp.assign(1, directionValuesUp);
-  
-  const int directionValuesUpDown[2] = {Pattern::DIRECTION_UP, Pattern::DIRECTION_DOWN};
-  Array<int, MAX_PATTERN_DIRECTIONS> directionsUpDown;
-  directionsUpDown.assign(2, directionValuesUpDown);
-  
+  const int offsets012[3] = {0, 1, 2};
+  const int offset01[2] = {0, 1};
+  const int directionsUp[1] = {Pattern::DIRECTION_UP};
+  const int directionsUpDown[2] = {Pattern::DIRECTION_UP, Pattern::DIRECTION_DOWN};
   
   //
   // Pattern: Initialization
@@ -353,9 +344,9 @@ void Tests::runPatternTests() {
   Serial << "#Pattern: initialize" << endl;
   Pattern pattern; 
   Pattern childPattern; 
-  childPattern.init(offsets01, directionsUp);
+  childPattern.init(2, offset01, 1, directionsUp);
   
-  pattern.init(offsets012, directionsUpDown);
+  pattern.init(3, offsets012, 2, directionsUpDown);
   pattern.setChildPattern(&childPattern);
   
   test(
@@ -483,9 +474,72 @@ void Tests::runPatternTests() {
   test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
   test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
   test(__LINE__, (pattern.getCurrOffsetSum()                    == 0) , "- offset sum");
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Scale Tests
+//
+//////////////////////////////////////////////////////////////////////
+
+void Tests::runScaleTests() {
   
-//Serial << "Debug P: " << pattern.getCurrOffsetIdx() << endl;
-//Serial << "Debug C: " << pattern.getChildPattern()->getCurrOffsetIdx() << endl;
+  Serial << "#Scale: initialize" << endl;
+  Scale scale;
+  scale.init(Scale::C_0, Scale::INTERVALS_MAJOR_SIZE,  Scale::INTERVALS_MAJOR);
+  Array<int, MAX_CHORD_SIZE> chord;
+
+  //
+  // Scale: Chord values
+  //
+  
+  Serial << "#Chord: #getNote" << endl;
+  test(__LINE__, (scale.getNote(0) == Scale::C_0),          "- 0 note should be C");
+  test(__LINE__, (scale.getNote(1) == Scale::D_0),          "- 1 note should be D");
+  test(__LINE__, (scale.getNote(2) == Scale::E_0),          "- 2 note should be E");
+  test(__LINE__, (scale.getNote(3) == Scale::F_0),          "- 3 note should be F");
+  test(__LINE__, (scale.getNote(4) == Scale::G_0),          "- 4 note should be G");
+  test(__LINE__, (scale.getNote(5) == Scale::A_0),          "- 5 note should be A");
+  test(__LINE__, (scale.getNote(6) == Scale::B_0),          "- 6 note should be B");
+  test(__LINE__, (scale.getNote(7) == (Scale::C_0 + 12)),   "- 7 note should be C1");
+  test(__LINE__, (scale.getNote(8) == (Scale::D_0 + 12)),   "- 8 note should be D1");
+  
+  //
+  // Scale: Chord values
+  //
+  
+  Serial << "#Chord: I chord" << endl;
+  chord = scale.getChord(0);
+  test(__LINE__, (chord.getSize() == 5),       "- 5 notes to chord");
+  test(__LINE__, (chord.at(0) == Scale::C_0),  "- root of I");
+  test(__LINE__, (chord.at(1) == Scale::E_0),  "- third of I");
+  test(__LINE__, (chord.at(2) == Scale::G_0),  "- fifth of I");
+  test(__LINE__, (chord.at(3) == Scale::B_0),  "- seventh of I");
+
+  Serial << "#Chord: ii chord" << endl;
+  chord = scale.getChord(1);
+  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
+  test(__LINE__, (chord.at(0) == Scale::D_0),       "- root of ii");
+  test(__LINE__, (chord.at(1) == Scale::F_0),       "- third of ii");
+  test(__LINE__, (chord.at(2) == Scale::A_0),       "- fifth of ii");
+  test(__LINE__, (chord.at(3) == Scale::C_0 + 12),  "- seventh of ii");
+
+  Serial << "#Chord: iii chord" << endl;
+  chord = scale.getChord(2);
+  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
+  test(__LINE__, (chord.at(0) == Scale::E_0),       "- root of iii");
+  test(__LINE__, (chord.at(1) == Scale::G_0),       "- third of iii");
+  test(__LINE__, (chord.at(2) == Scale::B_0),       "- fifth of iii");
+  test(__LINE__, (chord.at(3) == Scale::D_0 + 12),  "- seventh of iii");
+
+  Serial << "#Chord: IV chord" << endl;
+  chord = scale.getChord(3);
+  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
+  test(__LINE__, (chord.at(0) == Scale::F_0),       "- root of IV");
+  test(__LINE__, (chord.at(1) == Scale::A_0),       "- third of IV");
+  test(__LINE__, (chord.at(2) == Scale::C_0 + 12),  "- fifth of IV");
+  test(__LINE__, (chord.at(3) == Scale::E_0 + 12),  "- seventh of IV");
+  //Serial << "#DEBUG: " << chord.at(3) << endl;
 }
 
 

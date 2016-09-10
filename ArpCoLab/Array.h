@@ -24,6 +24,7 @@ class Array
     int  getSize();
     bool hasIdx(int _idx);
     void push(const T &_value);
+    void set(int _idx, const T &_value);
   private:
     T values[MAX_SIZE];
     size_t size;

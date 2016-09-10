@@ -12,7 +12,7 @@ class Pattern {
   
     Pattern();
 
-    void init(Array<int, MAX_PATTERN_SIZE> _offsets, Array<int, MAX_PATTERN_DIRECTIONS> _directions);
+    void init(const int _numOffsets,  const int _offsets[], const int _numDirections,  const int _directions[]);
 
     int  getCurrOffset();    // Returns only this pattern's offset. Not it's child's
     int  getCurrOffsetIdx(); // Returns only this pattern's offsetIdx. Not it's child's

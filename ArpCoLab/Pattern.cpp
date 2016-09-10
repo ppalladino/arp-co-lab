@@ -8,9 +8,9 @@ Pattern::Pattern() {
    //Pattern childPattern;
 }
 
-void Pattern::init(Array<int, MAX_PATTERN_SIZE> _offsets, Array<int, MAX_PATTERN_DIRECTIONS> _directions) {
-  offsets = _offsets;
-  directions = _directions;
+void Pattern::init(const int _numOffsets,  const int _offsets[], const int _numDirections,  const int _directions[]) {
+  offsets.assign(_numOffsets, _offsets);
+  directions.assign(_numDirections, _directions);
   hasChildPattern = false;
   reset();
 }

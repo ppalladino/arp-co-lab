@@ -155,4 +155,13 @@ void Array<T, MAX_SIZE>::push(const T &_value)
   }
 }
 
+template <typename T, size_t MAX_SIZE>
+void Array<T, MAX_SIZE>::set(int _idx, const T &_value)
+{
+  if (hasIdx(_idx))
+  {
+    values[_idx] = _value;
+  }
+}
+
 #endif

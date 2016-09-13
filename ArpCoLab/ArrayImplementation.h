@@ -1,8 +1,6 @@
 #ifndef ARRAY_IMPLEMENTATION_H
 #define ARRAY_IMPLEMENTATION_H
 
-#include <Streaming.h>
-
 template <typename T, size_t MAX_SIZE>
 Array<T, MAX_SIZE>::Array()
 {
@@ -66,9 +64,18 @@ void Array<T, MAX_SIZE>::assign(const size_t _n, const T _values[])
 }
 
 template <typename T, size_t MAX_SIZE>
-T& Array<T, MAX_SIZE>::at(const size_t _i)
+T& Array<T, MAX_SIZE>::_at(const size_t _idx)
 {
-  return values[_i];
+  return values[_idx];
+}
+
+template <typename T, size_t MAX_SIZE>
+T& Array<T, MAX_SIZE>::at(const size_t _idx, T _default)
+{
+  if(hasIdx(_idx)) {
+    return values[_idx];
+  }
+  return _default;
 }
 
 template <typename T, size_t MAX_SIZE>
@@ -94,7 +101,7 @@ int Array<T, MAX_SIZE>::getIdx(const T &_value)
 {  
   int idx = -1;
   for(int i = 0; i < getSize(); i++) {
-    if(at(i) == _value) {
+    if(_at(i) == _value) {
       idx = i;
       break;
     }

@@ -2,6 +2,7 @@
 #define SCALE_HPP
 
 #include "Array.h"
+#include "IntArray.h"
 
 #define MAX_CHORD_SIZE 5
 #define MAX_SCALE_SIZE 12
@@ -23,6 +24,16 @@ class Scale {
     static const int Bb_0;
     static const int B_0;
 
+    // Chord Types
+    static const int CHORD_ROOT;
+    static const int CHORD_ROOT_OCTAVE;
+    static const int CHORD_ROOT_THIRD;
+    static const int CHORD_ROOT_FIFTH;
+    static const int CHORD_TRIAD;
+    static const int CHORD_SEVENTH;
+    static const IntArray<6> CHORD_TYPES;
+
+    // Scale Types
     static const int INTERVALS_MAJOR_SIZE;
     static const int INTERVALS_MAJOR[];
 
@@ -33,7 +44,7 @@ class Scale {
     static const int INTERVALS_MINOR_P[];
     
     void                       init(int _tonic, const int _numIntervals,  const int _intervals[]);
-    Array<int, MAX_CHORD_SIZE> getChord(int _offset);
+    Array<int, MAX_CHORD_SIZE> getChord(int _offset, const int _chordType);
     int                        getNote(int _offset);
       
   private:

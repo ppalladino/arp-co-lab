@@ -21,8 +21,16 @@ Scale::Scale() {}
   const int Scale::Bb_0 = 10;
   const int Scale::B_0  = 11;
 
+  const int Scale::CHORD_ROOT = 0;
+  const int Scale::CHORD_ROOT_OCTAVE = 1;
+  const int Scale::CHORD_ROOT_THIRD = 2;
+  const int Scale::CHORD_ROOT_FIFTH = 3;
+  const int Scale::CHORD_TRIAD = 4;
+  const int Scale::CHORD_SEVENTH = 5;
+  const IntArray<6> Scale::CHORD_TYPES(0, 5);
+
   const int Scale::INTERVALS_MAJOR_SIZE = 7;
-  const int Scale::INTERVALS_MAJOR[]  = {2,2,1,2,2,2,1};
+  const int Scale::INTERVALS_MAJOR[] = {2,2,1,2,2,2,1};
 
   const int Scale::INTERVALS_MINOR_SIZE = 7;
   const int Scale::INTERVALS_MINOR[]  = {2,1,2,2,2,2,1};
@@ -39,7 +47,7 @@ void Scale::setTonicOffsets(const int _numIntervals,  const int _intervals[]) {
   tonicOffsets.assign(_numIntervals, 0);
 
   for(int i = 0; i < tonicOffsets.getSize(); i++) {
-    int val = (i == 0) ? 0 : (tonicOffsets.at(i - 1) + _intervals[i - 1]);
+    int val = (i == 0) ? 0 : (tonicOffsets.at(i - 1, 0) + _intervals[i - 1]);
 
     #ifdef DEBUG_SCALE
       Serial << "Scale:tonicOffsets; i:" << i << "; val:" << val << endl;
@@ -48,13 +56,31 @@ void Scale::setTonicOffsets(const int _numIntervals,  const int _intervals[]) {
   }
 }
 
-Array<int, MAX_CHORD_SIZE> Scale::getChord(int _tonicOffset) {
+
+
+Array<int, MAX_CHORD_SIZE> Scale::getChord(int _tonicOffset, const int _chordType) {
   Array<int, MAX_CHORD_SIZE> chord;
-  chord.push(getNote(_tonicOffset));     // root
-  chord.push(getNote(_tonicOffset + 2)); // third
-  chord.push(getNote(_tonicOffset + 4)); // fifth
-  chord.push(getNote(_tonicOffset + 6)); // seventh
-  chord.push(getNote(_tonicOffset + 8)); // ninth
+  // Every chord has a root note
+  chord.push(getNote(_tonicOffset));
+  switch(_chordType) {
+    case Scale::CHORD_ROOT_OCTAVE:
+      break;
+    case Scale::CHORD_ROOT_THIRD:
+      chord.push(getNote(_tonicOffset + 2));
+      break;
+    case Scale::CHORD_ROOT_FIFTH:
+      chord.push(getNote(_tonicOffset + 4));
+      break;
+    case Scale::CHORD_TRIAD:
+      chord.push(getNote(_tonicOffset + 2));
+      chord.push(getNote(_tonicOffset + 4));
+      break;
+    case Scale::CHORD_SEVENTH: 
+      chord.push(getNote(_tonicOffset + 2));
+      chord.push(getNote(_tonicOffset + 4));
+      chord.push(getNote(_tonicOffset + 6));
+      break;
+  }
   return chord;
 }
 
@@ -76,7 +102,7 @@ int Scale::getNote(int _tonicOffset) {
       Serial << "Scale::getNote; Can't find offsetIdx: " << offsetIdx << " returning 0 instead." << endl;
     #endif
   } else {
-    note = tonic + tonicOffsets.at(offsetIdx) + (octave * 12);
+    note = tonic + tonicOffsets.at(offsetIdx, 0) + (octave * 12);
   }
   
   #ifdef DEBUG_SCALE

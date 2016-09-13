@@ -9,6 +9,7 @@ Tests::Tests() {
 
 void Tests::runTests() {
   runArrayTests();
+  runIntArrayTests();
   runTapTempoTests();
   runPatternTests();
   runScaleTests();
@@ -63,12 +64,12 @@ void Tests::runArrayTests() {
   );
   test(
     __LINE__,
-    (intArray.at(0) == 1), 
+    (intArray._at(0) == 1), 
     "- at(0) should return 0"
   );
   test(
     __LINE__,
-    (intArray.at(4) == 5), 
+    (intArray._at(4) == 5), 
     "- at(0) should return 0"
   );
 
@@ -91,7 +92,7 @@ void Tests::runArrayTests() {
   );
   test(
     __LINE__,
-    (pushedValuesArray.at(0) == 1), 
+    (pushedValuesArray._at(0) == 1), 
     "- first value should be 1"
   );
   pushedValuesArray.push(66);
@@ -102,7 +103,7 @@ void Tests::runArrayTests() {
   );
   test(
     __LINE__,
-    (pushedValuesArray.at(1) == 66), 
+    (pushedValuesArray._at(1) == 66), 
     "- first value should be 66"
   );
 
@@ -119,12 +120,12 @@ void Tests::runArrayTests() {
   );
   test(
     __LINE__,
-    (arrayFilled.at(0) == 0), 
+    (arrayFilled._at(0) == 0), 
     "- first value should be 0"
   );
   test(
     __LINE__,
-    (arrayFilled.at(4) == 0), 
+    (arrayFilled._at(4) == 0), 
     "- last value should be 0"
   );
   arrayFilled.fill(33);
@@ -135,12 +136,12 @@ void Tests::runArrayTests() {
   );
   test(
     __LINE__,
-    (arrayFilled.at(0) == 33), 
+    (arrayFilled._at(0) == 33), 
     "- first value should be 33"
   );
   test(
     __LINE__,
-    (arrayFilled.at(4) == 33), 
+    (arrayFilled._at(4) == 33), 
     "- last value should be 33"
   );
 
@@ -215,6 +216,30 @@ void Tests::runArrayTests() {
     (intArray.getPrevIdx(14) == 4), 
     "- the prev after idx 14 is OOB so should return last idx = 4"
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// IntArray Tests
+//
+//////////////////////////////////////////////////////////////////////
+
+void Tests::runIntArrayTests() {
+
+  IntArray<10> intArray(2,7);
+
+  //
+  // Array: Initialization
+  //
+ 
+  Serial << "#IntArray: initialize" << endl;
+  test( __LINE__, (intArray.getSize() == 6), "- size should be 6");
+  test( __LINE__, (intArray._at(0) == 2), "- idx 0 should = 2");
+  test( __LINE__, (intArray._at(1) == 3), "- idx 0 should = 3");
+  test( __LINE__, (intArray._at(2) == 4), "- idx 0 should = 4");
+  test( __LINE__, (intArray._at(3) == 5), "- idx 0 should = 5");
+  test( __LINE__, (intArray._at(4) == 6), "- idx 0 should = 6");
+  test( __LINE__, (intArray._at(5) == 7), "- idx 0 should = 7");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -509,37 +534,34 @@ void Tests::runScaleTests() {
   //
   
   Serial << "#Chord: I chord" << endl;
-  chord = scale.getChord(0);
-  test(__LINE__, (chord.getSize() == 5),       "- 5 notes to chord");
-  test(__LINE__, (chord.at(0) == Scale::C_0),  "- root of I");
-  test(__LINE__, (chord.at(1) == Scale::E_0),  "- third of I");
-  test(__LINE__, (chord.at(2) == Scale::G_0),  "- fifth of I");
-  test(__LINE__, (chord.at(3) == Scale::B_0),  "- seventh of I");
+  chord = scale.getChord(0, Scale::CHORD_SEVENTH);
+  test(__LINE__, (chord.getSize() == 4),       "- 4 notes to a 7th chord");
+  test(__LINE__, (chord._at(0) == Scale::C_0),  "- root of I");
+  test(__LINE__, (chord._at(1) == Scale::E_0),  "- third of I");
+  test(__LINE__, (chord._at(2) == Scale::G_0),  "- fifth of I");
+  test(__LINE__, (chord._at(3) == Scale::B_0),  "- seventh of I");
 
   Serial << "#Chord: ii chord" << endl;
-  chord = scale.getChord(1);
-  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
-  test(__LINE__, (chord.at(0) == Scale::D_0),       "- root of ii");
-  test(__LINE__, (chord.at(1) == Scale::F_0),       "- third of ii");
-  test(__LINE__, (chord.at(2) == Scale::A_0),       "- fifth of ii");
-  test(__LINE__, (chord.at(3) == Scale::C_0 + 12),  "- seventh of ii");
+  chord = scale.getChord(1, Scale::CHORD_SEVENTH);
+  test(__LINE__, (chord._at(0) == Scale::D_0),       "- root of ii");
+  test(__LINE__, (chord._at(1) == Scale::F_0),       "- third of ii");
+  test(__LINE__, (chord._at(2) == Scale::A_0),       "- fifth of ii");
+  test(__LINE__, (chord._at(3) == Scale::C_0 + 12),  "- seventh of ii");
 
   Serial << "#Chord: iii chord" << endl;
-  chord = scale.getChord(2);
-  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
-  test(__LINE__, (chord.at(0) == Scale::E_0),       "- root of iii");
-  test(__LINE__, (chord.at(1) == Scale::G_0),       "- third of iii");
-  test(__LINE__, (chord.at(2) == Scale::B_0),       "- fifth of iii");
-  test(__LINE__, (chord.at(3) == Scale::D_0 + 12),  "- seventh of iii");
+  chord = scale.getChord(2, Scale::CHORD_SEVENTH);
+  test(__LINE__, (chord._at(0) == Scale::E_0),       "- root of iii");
+  test(__LINE__, (chord._at(1) == Scale::G_0),       "- third of iii");
+  test(__LINE__, (chord._at(2) == Scale::B_0),       "- fifth of iii");
+  test(__LINE__, (chord._at(3) == Scale::D_0 + 12),  "- seventh of iii");
 
   Serial << "#Chord: IV chord" << endl;
-  chord = scale.getChord(3);
-  test(__LINE__, (chord.getSize() == 5),            "- 5 notes to chord");
-  test(__LINE__, (chord.at(0) == Scale::F_0),       "- root of IV");
-  test(__LINE__, (chord.at(1) == Scale::A_0),       "- third of IV");
-  test(__LINE__, (chord.at(2) == Scale::C_0 + 12),  "- fifth of IV");
-  test(__LINE__, (chord.at(3) == Scale::E_0 + 12),  "- seventh of IV");
-  //Serial << "#DEBUG: " << chord.at(3) << endl;
+  chord = scale.getChord(3, Scale::CHORD_SEVENTH);
+  test(__LINE__, (chord._at(0) == Scale::F_0),       "- root of IV");
+  test(__LINE__, (chord._at(1) == Scale::A_0),       "- third of IV");
+  test(__LINE__, (chord._at(2) == Scale::C_0 + 12),  "- fifth of IV");
+  test(__LINE__, (chord._at(3) == Scale::E_0 + 12),  "- seventh of IV");
+  //Serial << "#DEBUG: " << chord._at(3) << endl;
 }
 
 

@@ -5,6 +5,7 @@
 #include <Streaming.h>
 #include <assert.h>
 #include "Array.h"
+#include "IntArray.h"
 #include "TapTempo.h"
 #include "Pattern.h"
 #include "Scale.h"
@@ -15,6 +16,7 @@ class Tests
     Tests();
     void runTests();
     void runArrayTests();
+    void runIntArrayTests();
     void runTapTempoTests();
     void runPatternTests();
     void runScaleTests();

@@ -106,17 +106,11 @@ bool Pattern::isLastStep() {
 }
 
 int Pattern::getOffset(int _idx) {
-  if(offsets.hasIdx(_idx)) {
-    return offsets.at(_idx);
-  }
-  return 0;
+  return offsets.at(_idx, 0);
 }
 
 int Pattern::getDirection(int _idx) {
-  if(directions.hasIdx(_idx)){
-    return directions.at(_idx);
-  }
-  return Pattern::DIRECTION_UP;
+  return directions.at(_idx, Pattern::DIRECTION_UP);
 }
     
 int Pattern::getCurrStep() {

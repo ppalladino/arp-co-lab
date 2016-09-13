@@ -13,7 +13,8 @@ class Array
     T&   operator[](const size_t _i);
     void assign(const size_t _n, const T &_value);
     void assign(const size_t _n, const T _values[]);
-    T&   at(const size_t i);
+    T&   at(const size_t i, T _default);               
+    T&   _at(const size_t i);
     void clear();
     void fill(const T &_value);
     void fill(const T (&_values)[MAX_SIZE]);

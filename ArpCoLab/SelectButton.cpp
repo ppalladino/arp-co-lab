@@ -5,36 +5,31 @@
 //#ifdef DEBUG_SELECT_BUTTON
 //  #include <Streaming.h>
 //#endif
-  
-SelectButton::SelectButton() {}
 
-void SelectButton::init(const int _numOptions,  const int _options[]) {
-  init(_numOptions, _options, 0);
+SelectButton::SelectButton() {}
+   
+void SelectButton::init(int _startRange,  int _endRange) {
+  init(_startRange, _endRange, 0);
 }
 
-void SelectButton::init(const int _numOptions,  const int _options[], const int _selectedIdx) {
-  int numOptions = _numOptions > SELECT_BUTTON_MAX_SIZE ? SELECT_BUTTON_MAX_SIZE : _numOptions;
-  options.assign(numOptions, _options);
+void SelectButton::init(int _startRange,  int _endRange, const int _selectedIdx) {
+  options.range(_startRange, _endRange);
   prevPinValue = 0;
   selectedIdx = _selectedIdx;
 }
 
-
 int SelectButton::getSelectedOption() {
-  return options.at(selectedIdx, 0);;
+  return options.at(selectedIdx, 0);
 }
 
 void SelectButton::readPin(int _pinValue) {
-
   bool pinValueChanged = _pinValue != prevPinValue;
   if(pinValueChanged && _pinValue == 1) {
     selectedIdx = options.getNextIdx(selectedIdx);    
     
-//    #ifdef DEBUG_SELECT_BUTTON
-//      Serial << "SelectButton: selectedIdx:" << selectedIdx << endl;
-//    #endif
+    #ifdef DEBUG_SELECT_BUTTON
+      Serial << "SelectButton: selectedIdx:" << selectedIdx << endl;
+    #endif
   }
   prevPinValue = _pinValue;
 }
-
-

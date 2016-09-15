@@ -6,13 +6,9 @@
 #include "Pattern.h"
 #include "Scale.h"
 
-#define MAX_ACTIVE_NOTES 4
-
 #define TEMPO_PIN 22
 #define OCTAVE_PIN 24
 #define CHORD_INTERVALS_PIN 26
-
-#define KEY_PIN 52
 
 #define DEBUG_MAIN;
 
@@ -20,7 +16,7 @@
   #include <Streaming.h>
 #endif
 
-#define RUN_TESTS
+// #define RUN_TESTS
 
 #ifdef RUN_TESTS
   #include "Tests.h"
@@ -36,7 +32,7 @@
   MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
   
   TapTempo tapTempo;
-  SelectButton keySelectButton;
+  
   SelectButton octaveSelectButton;
   SelectButton chordIntervalsSelectButton;
   
@@ -46,12 +42,8 @@
   Array<int, MAX_PATTERN_SIZE> melodyPatternOffsets1;
   Array<int, MAX_PATTERN_SIZE> melodyPatternOffsets2;
   
-  
-  Array<Array<int, MAX_CHORD_SIZE>, 3> chordTypes;
-  
   Scale scale;
   Array<int, MAX_CHORD_SIZE> chord;
-  Array<int, MAX_ACTIVE_NOTES> activeNotes;
   
   void setup()
   {
@@ -61,18 +53,10 @@
     pinMode(OCTAVE_PIN, OUTPUT);
     pinMode(CHORD_INTERVALS_PIN, OUTPUT);
   
-    pinMode(KEY_PIN, OUTPUT);
-  
     MIDI.begin(MIDI_CHANNEL_OFF);
     
-    int keys[3] = {1, 2, 3};
-    keySelectButton.init(3, keys);
-  
-    int octaves[6] = {0, 1, 2, 3, 4, 5};
-    octaveSelectButton.init(6, octaves, 2);
-  
-    int chordIntervals[5] = {0, 1, 2, 3, 4}; // R, R+3rd, R+5th, Triad, 7th
-    chordIntervalsSelectButton.init(5, chordIntervals);
+    octaveSelectButton.init(0, 5, 2); 
+    chordIntervalsSelectButton.init(0, Scale::CHORD_INTERVALS.getLastIdx());
   
     const int directionsUp[1] = {Pattern::DIRECTION_UP};
     const int directionsUpDown[2] = {Pattern::DIRECTION_UP, Pattern::DIRECTION_DOWN};
@@ -89,7 +73,6 @@
     tapTempo.init(1000, TapTempo::QUARTER_NOTE, TapTempo::QUARTER_NOTE);
   
     scale.init(Scale::C_0, Scale::INTERVALS_MAJOR_SIZE,  Scale::INTERVALS_MAJOR);
-    chord = scale.getChord(0, 0);
   }
   
   void loop()
@@ -99,9 +82,7 @@
     tapTempo.readPin(digitalRead(TEMPO_PIN), nowMs);
     octaveSelectButton.readPin(digitalRead(OCTAVE_PIN));
     chordIntervalsSelectButton.readPin(digitalRead(CHORD_INTERVALS_PIN));
-    
-    keySelectButton.readPin(digitalRead(KEY_PIN));
-  
+      
     if(tapTempo.isBeat(nowMs)) {
       //Serial.print("* Beat:");
       //Serial.println(tapTempo.getBpm());
@@ -110,40 +91,20 @@
       // Clear old notes
       //
       
-      for(int i = 0; i < activeNotes.getSize(); i++) {
-        MIDI.sendNoteOff(activeNotes.at(i, 0), 127, 1);
+      for(int i = 0; i < chord.getSize(); i++) {
+        MIDI.sendNoteOff(chord.at(i, 0), 127, 1);
       }
-      activeNotes.clear();
   
   
       int octaveOffset = (octaveSelectButton.getSelectedOption() * 12);
       int melodyOffset = melodyPattern1.getCurrOffsetSum();
-      chord = scale.getChord(melodyOffset, 0);
+      chord = scale.getChord(
+        octaveOffset + melodyOffset, 
+        chordIntervalsSelectButton.getSelectedOption()
+      );
   
-      activeNotes.clear();
-      switch(chordIntervalsSelectButton.getSelectedOption() ) {
-        case 0: // Root
-          activeNotes.push(chord.at(0, 0)  + octaveOffset);
-          break;
-        case 1: // R+3rd
-          activeNotes.push(chord.at(0, 0)  + octaveOffset);
-          activeNotes.push(chord.at(1, 0)  + octaveOffset);
-          break;
-        case 2: // R+5th
-          activeNotes.push(chord.at(0, 0)  + octaveOffset);
-          activeNotes.push(chord.at(2, 0)  + octaveOffset);
-          break;
-        case 3: // Triad
-          activeNotes.push(chord.at(0, 0)  + octaveOffset);
-          activeNotes.push(chord.at(1, 0)  + octaveOffset);
-          activeNotes.push(chord.at(2, 0)  + octaveOffset);
-          break;
-        case 4: // 7th
-          activeNotes.push(chord.at(0, 0)  + octaveOffset);
-          activeNotes.push(chord.at(1, 0)  + octaveOffset);
-          activeNotes.push(chord.at(2, 0)  + octaveOffset);
-          activeNotes.push(chord.at(3, 0)  + octaveOffset);
-          break;
+      for(int i = 0; i < chord.getSize(); i++) {
+        MIDI.sendNoteOn(chord.at(i, 0), 127, 1);
       }
   
       
@@ -157,11 +118,6 @@
       #endif
   
       
-      for(int i = 0; i < activeNotes.getSize(); i++) {
-        MIDI.sendNoteOn(activeNotes.at(i, 0), 127, 1);
-        //Serial << "!!!!!!!!!!!!!!!!!!!!!!!: " << activeNotes.at(i, 0) << endl;
-      } 
-  
   //    note = chord.at(0, 0) + octaveOffset;
   //    note = note > 127 ? 127 : note;
   //    note = note < 0 ? 0 : note;

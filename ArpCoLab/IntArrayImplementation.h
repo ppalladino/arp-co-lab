@@ -7,9 +7,16 @@
   #include <Streaming.h>
 #endif
 
+
+template <size_t MAX_SIZE>
+IntArray<MAX_SIZE>::IntArray()
+{
+  clear();
+}
+
 template <size_t MAX_SIZE>   
 IntArray<MAX_SIZE>::IntArray(int _startRange, int _endRange) {
-  // clear(); called in range method
+  clear();
   range(_startRange, _endRange);
 }
 

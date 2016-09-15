@@ -31,7 +31,7 @@ class Scale {
     static const int CHORD_ROOT_FIFTH;
     static const int CHORD_TRIAD;
     static const int CHORD_SEVENTH;
-    static const IntArray<6> CHORD_TYPES;
+    static const IntArray<6> CHORD_INTERVALS;
 
     // Scale Types
     static const int INTERVALS_MAJOR_SIZE;

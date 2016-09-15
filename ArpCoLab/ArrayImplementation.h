@@ -108,7 +108,13 @@ int Array<T, MAX_SIZE>::getIdx(const T &_value)
   }
   return idx;
 }
-
+    
+template <typename T, size_t MAX_SIZE>
+int Array<T, MAX_SIZE>::getLastIdx()
+{  
+  return  getSize() - 1;
+}
+    
 template <typename T, size_t MAX_SIZE>
 int Array<T, MAX_SIZE>::getNextIdx(int _idx)
 {  

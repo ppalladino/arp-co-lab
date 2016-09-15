@@ -19,6 +19,7 @@ class Array
     void fill(const T &_value);
     void fill(const T (&_values)[MAX_SIZE]);
     int  getIdx(const T &_value);
+    int  getLastIdx();
     int  getNextIdx(int _idx);
     int  getPrevIdx(int _idx);
     int  getRandomIdx();

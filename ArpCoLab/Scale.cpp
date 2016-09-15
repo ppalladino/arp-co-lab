@@ -27,7 +27,7 @@ Scale::Scale() {}
   const int Scale::CHORD_ROOT_FIFTH = 3;
   const int Scale::CHORD_TRIAD = 4;
   const int Scale::CHORD_SEVENTH = 5;
-  const IntArray<6> Scale::CHORD_TYPES(0, 5);
+  const IntArray<6> Scale::CHORD_INTERVALS(0, 5);
 
   const int Scale::INTERVALS_MAJOR_SIZE = 7;
   const int Scale::INTERVALS_MAJOR[] = {2,2,1,2,2,2,1};
@@ -64,6 +64,8 @@ Array<int, MAX_CHORD_SIZE> Scale::getChord(int _tonicOffset, const int _chordTyp
   chord.push(getNote(_tonicOffset));
   switch(_chordType) {
     case Scale::CHORD_ROOT_OCTAVE:
+      chord.push(getNote(_tonicOffset));
+      chord.push(getNote(_tonicOffset + 1));
       break;
     case Scale::CHORD_ROOT_THIRD:
       chord.push(getNote(_tonicOffset + 2));

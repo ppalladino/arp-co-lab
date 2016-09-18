@@ -104,6 +104,7 @@
       );
   
       for(int i = 0; i < chord.getSize(); i++) {
+        if(i > 127 || i < 0) { continue; }
         MIDI.sendNoteOn(chord.at(i, 0), 127, 1);
       }
   

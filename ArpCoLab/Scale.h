@@ -26,12 +26,11 @@ class Scale {
 
     // Chord Types
     static const int CHORD_ROOT;
-    static const int CHORD_ROOT_OCTAVE;
     static const int CHORD_ROOT_THIRD;
     static const int CHORD_ROOT_FIFTH;
     static const int CHORD_TRIAD;
     static const int CHORD_SEVENTH;
-    static const IntArray<6> CHORD_INTERVALS;
+    static const IntArray<5> CHORD_INTERVALS;
 
     // Scale Types
     static const int INTERVALS_MAJOR_SIZE;

@@ -55,8 +55,6 @@ void Scale::setTonicOffsets(const int _numIntervals,  const int _intervals[]) {
   }
 }
 
-
-
 Array<int, MAX_CHORD_SIZE> Scale::getChord(int _tonicOffset, const int _chordType) {
   Array<int, MAX_CHORD_SIZE> chord;
   // Every chord has a root note

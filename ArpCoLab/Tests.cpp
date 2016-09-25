@@ -499,6 +499,42 @@ void Tests::runPatternTests() {
   test(__LINE__, (pattern.getChildPattern()->getCurrStep()      == 0) , "- child currStep");
   test(__LINE__, (pattern.getChildPattern()->getCurrOffset()    == 0) , "- child offset");
   test(__LINE__, (pattern.getCurrOffsetSum()                    == 0) , "- offset sum");
+
+  //
+  // Pattern: Limit steps
+  //
+  
+  Serial << "#Pattern: limit steps" << endl;
+   // Used in various tests, do not mutate!!
+  const int offsets0123[4] = {0, 1, 2, 3};
+  Pattern patternLimitSteps; 
+  patternLimitSteps.init(4, offsets0123, 1, directionsUp);
+
+  test(__LINE__, (patternLimitSteps.getNumSteps() == 4)     , "- num steps not limited");
+  
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 0)     , "- num steps not limited - first step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == false)  , "- num steps not limited - not last step");
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 1)     , "- num steps not limited - second step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == false)  , "- num steps not limited - not last step");
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 2)     , "- num steps not limited - third step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == false)  , "- num steps not limited - not last step");
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 3)     , "- num steps not limited - fourth step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == true)   , "- num steps not limited - is last step");
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 0)     , "- num steps not limited - first step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == false)  , "- num steps not limited - not last step");
+
+  patternLimitSteps.setStepsLimit(2); // Set the limit
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 1)     , "- num steps not limited - second step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == true)   , "- num steps not limited - is last step");
+  patternLimitSteps.takeStep();
+  test(__LINE__, (patternLimitSteps.getCurrStep() == 0)     , "- num steps not limited - first step");
+  test(__LINE__, (patternLimitSteps.isLastStep() == false)  , "- num steps not limited - not last step");
+  Serial << "#Debug: " << patternLimitSteps.getCurrStep() << endl;
 }
 
 //////////////////////////////////////////////////////////////////////

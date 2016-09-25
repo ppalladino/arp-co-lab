@@ -16,6 +16,7 @@ void SelectButton::init(int _startRange,  int _endRange, const int _selectedIdx)
   options.range(_startRange, _endRange);
   prevPinValue = 0;
   selectedIdx = _selectedIdx;
+  justChanged = false;
 }
 
 int SelectButton::getSelectedOption() {
@@ -26,10 +27,18 @@ void SelectButton::readPin(int _pinValue) {
   bool pinValueChanged = _pinValue != prevPinValue;
   if(pinValueChanged && _pinValue == 1) {
     selectedIdx = options.getNextIdx(selectedIdx);    
+    justChanged = true;
     
     #ifdef DEBUG_SELECT_BUTTON
       Serial << "SelectButton: selectedIdx:" << selectedIdx << endl;
     #endif
+    
+  } else {
+    justChanged = false;
   }
   prevPinValue = _pinValue;
+}
+
+bool SelectButton::getJustChanged() {
+  return justChanged;
 }

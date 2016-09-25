@@ -1,29 +1,55 @@
 #include "Pattern.h"
 
+
+#define DEBUG_PATTERN;
+#ifdef DEBUG_PATTERN
+  #include <Streaming.h>
+#endif
+
 const int Pattern::DIRECTION_UP = 0;
 const int Pattern::DIRECTION_DOWN = 1;
 const int Pattern::DIRECTION_RANDOM = 2;
-    
-Pattern::Pattern() {
-   //Pattern childPattern;
-}
+
+const int Pattern::DIRECTIONS_UP[] = {Pattern::DIRECTION_UP};
+const int Pattern::DIRECTIONS_DOWN[] = {DIRECTION_DOWN};
+const int Pattern::DIRECTIONS_UP_DOWN[] = {Pattern::DIRECTION_UP, Pattern::DIRECTION_DOWN};
+const int Pattern::DIRECTIONS_DOWN_UP[] = {Pattern::DIRECTION_DOWN, Pattern::DIRECTION_UP};
+
+const int Pattern::PEDAL_OFFSETS[]    = {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };
+const int Pattern::INC_OFFSETS[]      = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 };
+const int Pattern::ALT_BIN_OFFSETS[]  = {  0,  1,  0,  1,  0,  1,  0,  1,  0,  1,  0,  1,  0,  1,  0,  1 };
+
+const int Pattern::BIN_PATTERN_1[]      = {  1,  1,  1,  0,  1,  1,  1,  0,  1,  1,  1,  0,  1,  1,  1,  0 };
+const int Pattern::BIN_PATTERN_2[]      = {  1,  0,  1,  0,  1,  1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1 };
+
+Pattern::Pattern() {}
 
 void Pattern::init(const int _numOffsets,  const int _offsets[], const int _numDirections,  const int _directions[]) {
-  offsets.assign(_numOffsets, _offsets);
-  directions.assign(_numDirections, _directions);
+  set(_numOffsets,  _offsets, _numDirections, _directions);
   hasChildPattern = false;
   reset();
 }
 
 void Pattern::reset() {
+  restart();
+  setStepsLimit(numSteps);
+  multiplier = 1;
+
+  if(hasChildPattern) {
+    childPattern->reset();
+  }
+}
+
+void Pattern::restart() {
   currOffsetIdx = 0;
   currDirectionIdx = 0;
   currOffset = 0;
   currStep = 0;
-  numSteps = offsets.getSize(); // expose this parameter later
+  numSteps = offsets.getSize();
+  setStepsLimit(stepsLimit); // make sure steps limit is in bounds
 
   if(hasChildPattern) {
-    childPattern->reset();
+    childPattern->restart();
   }
 }
 
@@ -78,7 +104,7 @@ void Pattern::takeStep()
     } 
 
     currStep++;
-    if(currStep >= numSteps) {
+    if(currStep >= stepsLimit) {
       currStep = 0;
     }
   }
@@ -97,12 +123,23 @@ int Pattern::getCurrOffsetSum() {
   if(hasChildPattern) {
     sum += childPattern->getCurrOffsetSum();
   }
-  sum += getOffset(currOffsetIdx);
+  sum += multiplier * getOffset(currOffsetIdx);
+
+//  #ifdef DEBUG_PATTERN
+//    Serial << "-----------------------------" << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: currOffsetIdx:" <<  currOffsetIdx << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: sum " <<  sum << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: isLastStep " <<  isLastStep() << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: numSteps " <<  numSteps << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: offsets.getSize() " <<  offsets.getSize() << endl;
+//    Serial << "Pattern - #getCurrOffsetSum: stepsLimit " <<  stepsLimit << endl;
+//  #endif
+  
   return sum;
 }
 
 bool Pattern::isLastStep() {
-  return (currStep >= numSteps - 1);
+  return (currStep >= stepsLimit - 1);
 }
 
 int Pattern::getOffset(int _idx) {
@@ -121,5 +158,110 @@ int Pattern::getNumSteps() {
   return numSteps;
 }
 
-    
+void Pattern::setStepsLimit(int _stepsLimit) {
+  if(_stepsLimit > numSteps) {
+    stepsLimit = numSteps;
+    return;
+  }
+
+  if(_stepsLimit < 0) {
+    stepsLimit = 0;
+    return;
+  }
+  stepsLimit = _stepsLimit;
+}
+
+void Pattern::setOffsets(const int _numOffsets,  const int _offsets[]) {
+  offsets.assign(_numOffsets, _offsets);
+  restart();
+}
+
+
+void Pattern::setDirections(const int _numDirections,  const int _directions[]) {
+  directions.assign(_numDirections, _directions);
+  restart();
+}
+
+void Pattern::set(const int _numOffsets,  const int _offsets[], const int _numDirections,  const int _directions[]) {
+  offsets.assign(_numOffsets, _offsets);
+  directions.assign(_numDirections, _directions);
+  restart();
+}
+
+void Pattern::setMultiplier(int _multiplier) {
+  multiplier = _multiplier;
+}
+
+void Pattern::applyPreset(const int _preset) {
+  #ifdef DEBUG_PATTERN
+    Serial << "Pattern - #applyPreset: " <<  _preset << endl;
+  #endif
+  
+  switch(_preset) {
+    case 0:
+      // OFF
+      set(16, Pattern::PEDAL_OFFSETS, 1,  Pattern::DIRECTIONS_UP);
+      setStepsLimit(0);
+      setMultiplier(1);
+      break;
+    case 1:
+      // PEDAL
+      set(16, Pattern::PEDAL_OFFSETS, 1,  Pattern::DIRECTIONS_UP);
+      setStepsLimit(8);
+      setMultiplier(1);
+      break;
+    case 2:
+      // Up
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_UP);
+      setStepsLimit(16);
+      setMultiplier(1);
+      break;
+    case 3:
+      // Down
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_DOWN);  
+      setStepsLimit(16);
+      setMultiplier(1);  
+      break;
+    case 4:
+      // Up - Triad Chord
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_UP);  
+      setStepsLimit(3); 
+      setMultiplier(2);
+      break;
+    case 5:
+      // Down - Triad Chord
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_DOWN);  
+      setStepsLimit(3); 
+      setMultiplier(2);
+      break;
+    case 6:
+      // Up - 7th Chord
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_UP);  
+      setStepsLimit(4); 
+      setMultiplier(2);
+      break;
+    case 7:
+      // Down - 7th Chord
+      set(16, Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_DOWN);  
+      setStepsLimit(4); 
+      setMultiplier(2);
+      break;
+    case 8:
+      // Alt Bin 3 - Up
+      set(16, Pattern::ALT_BIN_OFFSETS, 1,  Pattern::DIRECTIONS_UP);  
+      setStepsLimit(3); 
+      setMultiplier(2);
+      break;
+    case 9:
+      // Alt Bin 3 - Down
+      set(16, Pattern::ALT_BIN_OFFSETS, 1,  Pattern::DIRECTIONS_DOWN);  
+      setStepsLimit(3); 
+      setMultiplier(2);
+      break;
+    default:
+      set(16,  Pattern::INC_OFFSETS, 1,  Pattern::DIRECTIONS_UP);
+      setStepsLimit(8);  
+      setMultiplier(1);
+  }
+}
 

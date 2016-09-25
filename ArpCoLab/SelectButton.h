@@ -14,12 +14,14 @@ class SelectButton {
     void init(int _startRange,  int _endRange, const int _selectedIdx);
     int  getSelectedOption();
     void readPin(int _pinValue);
+    bool getJustChanged();
   
   private:
 
     IntArray<SELECT_BUTTON_MAX_SIZE> options;
     int      prevPinValue;
     int      selectedIdx;
+    bool     justChanged;
 };
 
 #endif
